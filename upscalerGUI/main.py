@@ -11,6 +11,9 @@ from kivy.uix.popup import Popup
 import os
 import glob
 import requests
+from PIL import Image
+import numpy as np
+import io
 
 #FileChooser
 class Box(BoxLayout):
@@ -33,15 +36,20 @@ class Main(BoxLayout):
 
         self.saved_file_path = ""
         self.path_is_directory = False
+        self.api_url = "http://localhost:5000"
         #Valid image files
         self.IMG_EXTENSIONS = ['.jpg','.jpeg', '.png', '.ppm', '.bmp','.tif']
         #Label that tracks loaded file/directory
         self.loaded_label = Label(text="")
         self.add_widget(self.loaded_label)
 
-        button = Button(text="Abrir explorador")
-        self.add_widget(button)
-        button.bind(on_release=self.open)
+        self.button = Button(text="Abrir explorador")
+        self.add_widget(self.button)
+        self.button.bind(on_release=self.open)
+
+        self.request_button = Button(text= "Fazer inferência")
+        self.add_widget(self.request_button)
+        self.request_button.bind(on_release=self.make_request)
 
     def open(self, instance):
         box = Box(self.save_filepath)
@@ -50,8 +58,8 @@ class Main(BoxLayout):
         popup.open()
     
     def save_filepath(self, filename):
-        if self.is_valid_file(filename[0]):
-            self.saved_file_path = filename
+        if len(filename) != 0 and self.is_valid_file(filename[0]):
+            self.saved_file_path = filename[0]
             #print(filename)
             if self.path_is_directory:
                 #Sets the label format
@@ -63,6 +71,7 @@ class Main(BoxLayout):
                 self.loaded_label.text = os.path.basename(filename[0])
 
         else:
+            self.saved_file_path = ""
             self.loaded_label.text = ""
     
     def is_valid_file(self, filename):
@@ -75,21 +84,43 @@ class Main(BoxLayout):
                 return False
         else:
             if any(filename.endswith(extension) for extension in self.IMG_EXTENSIONS):
+                self.path_is_directory = False
                 return True
     
     def get_image_files(self, filename, no_extension=False):
         image_list = []
         for extension in self.IMG_EXTENSIONS:
             search = filename+'/*'+extension
-            print(search)
             image_list += glob.glob(search)
-        print(image_list)
         if no_extension:
             for i in range(len(image_list)):
                 image_list[i] =  os.path.basename(image_list[i])
             return image_list
         else:
             return image_list
+
+    def make_request(self, instance):
+        if self.saved_file_path != "":
+            if self.path_is_directory:
+                for f in self.get_image_files(self.saved_file_path):
+                    file = [(os.path.basename(f), open(f, 'rb'))]
+                    response = self.send_request(file)
+                    self.save_response_files(response, file[0][0])
+            else:
+                file = [(os.path.basename(self.saved_file_path), open(self.saved_file_path, 'rb'))]
+                response = self.send_request(file)
+                self.save_response_files(response, file[0][0])
+
+    def send_request(self, file):
+        url = self.api_url+'/predict'
+        response = requests.post(url=url, 
+                                files=file)
+        return response
+    
+    def save_response_files(self, response, filename):
+        image = Image.open(io.BytesIO(response.content))
+        image.save(filename, "PNG")
+
 
 
 class MyApp(App):
