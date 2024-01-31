@@ -1,0 +1,20 @@
+#:kivy 2.3.0
+<Box>:
+    name: "hello"
+    id:box
+    cols: 2
+ 
+    FileChooserListView:
+        id:filechooser
+        dirselect: True
+
+    Button:
+        text: "Load"
+        size_hint: (0.1, 0.2)
+        on_release: box.open(filechooser.selection)
+    
+    Button:
+        text: "Cancel"
+        size_hint: (0.1, 0.2)
+        on_release: box.parent.dismiss()
+ 
