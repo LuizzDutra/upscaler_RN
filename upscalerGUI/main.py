@@ -14,6 +14,7 @@ import requests
 from PIL import Image
 import numpy as np
 import io
+from urllib.request import urlretrieve
 
 #FileChooser
 class Box(BoxLayout):
@@ -36,7 +37,9 @@ class Main(BoxLayout):
 
         self.saved_file_path = ""
         self.path_is_directory = False
-        self.api_url = "http://localhost:5000"
+        self.api_url = "http://localhost:5000/predict"
+        self.use_alt_api = True
+        self.alt_api_url = "https://api.picsart.io/tools/1.0/upscale"
         #Valid image files
         self.IMG_EXTENSIONS = ['.jpg','.jpeg', '.png', '.ppm', '.bmp','.tif']
         #Label that tracks loaded file/directory
@@ -109,17 +112,38 @@ class Main(BoxLayout):
             else:
                 file = [(os.path.basename(self.saved_file_path), open(self.saved_file_path, 'rb'))]
                 response = self.send_request(file)
+                print(response.json())
                 self.save_response_files(response, file[0][0])
 
     def send_request(self, file):
-        url = self.api_url+'/predict'
-        response = requests.post(url=url, 
-                                files=file)
-        return response
+        if not self.use_alt_api:
+            response = requests.post(url=self.api_url, 
+                                    files=file)
+            return response
+        else:
+            print(file)
+
+            files = { "image": (file[0][0], file[0][1], "image/png") }
+            payload = {
+                "upscale_factor": "x2",
+                "format": "PNG"
+            }
+            headers = {"accept": "application/json",
+                       "X-Picsart-API-Key": "xVCxSVMNlrOa1ZGBjiXUelQZvcMIoIXf"}
+        
+            response = requests.post(self.alt_api_url, data=payload, files=files, headers=headers)
+            return response
     
     def save_response_files(self, response, filename):
-        image = Image.open(io.BytesIO(response.content))
-        image.save(filename, "PNG")
+        if self.use_alt_api:
+            if response.status_code == 200 and response.json()['status'] == 'success':
+                query_parameters = {"downloadformat": "png"}
+                download_response = requests.get(response.json()['data']['url'], params=query_parameters, stream=True)
+                with open(filename, 'wb') as f:
+                    f.write(download_response.content)
+        else:
+            image = Image.open(io.BytesIO(response.content))
+            image.save(filename, "PNG")
 
 
 
