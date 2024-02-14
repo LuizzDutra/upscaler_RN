@@ -8,13 +8,13 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
+from kivy.uix.image import Image as ImageKivy
 import os
 import glob
 import requests
-from PIL import Image
+from PIL import Image 
 import numpy as np
 import io
-from urllib.request import urlretrieve
 
 #FileChooser
 class Box(BoxLayout):
@@ -38,14 +38,18 @@ class Main(BoxLayout):
         self.saved_file_path = ""
         self.path_is_directory = False
         self.api_url = "http://localhost:5000/predict"
-        self.use_alt_api = True
+        self.use_alt_api = False
         self.alt_api_url = "https://api.picsart.io/tools/1.0/upscale"
         self.alt_api_key = "xVCxSVMNlrOa1ZGBjiXUelQZvcMIoIXf"
         #Valid image files
         self.IMG_EXTENSIONS = ['.jpg','.jpeg', '.png', '.ppm', '.bmp','.tif']
         #Label that tracks loaded file/directory
-        self.loaded_label = Label(text="")
-        self.add_widget(self.loaded_label)
+        self.loaded_label_grid = GridLayout()
+        self.loaded_label_grid.cols = 1
+        self.loaded_image_grid = GridLayout()
+        self.loaded_image_grid.cols = 1
+        self.add_widget(self.loaded_image_grid)
+        self.add_widget(self.loaded_label_grid)
 
         self.button = Button(text="Abrir explorador")
         self.add_widget(self.button)
@@ -64,19 +68,32 @@ class Main(BoxLayout):
     def save_filepath(self, filename):
         if len(filename) != 0 and self.is_valid_file(filename[0]):
             self.saved_file_path = filename[0]
+            self.loaded_label_grid.clear_widgets()
+            self.loaded_image_grid.clear_widgets()
             #print(filename)
             if self.path_is_directory:
                 #Sets the label format
-                label_text = ""
-                for image in self.get_image_files(filename[0], no_extension=True):
-                    label_text += image+'\n'
-                self.loaded_label.text = label_text
+                for image in self.get_image_files(filename[0]):
+                    label_text = os.path.basename(image)
+                    label_image = ImageKivy(source=image)
+                    label_image.size = (64,64)
+                    label = Label(text=label_text)
+                    self.loaded_label_grid.add_widget(label)
+                    #label.add_widget(label_image)
+                    self.loaded_image_grid.add_widget(label_image)
             else:
-                self.loaded_label.text = os.path.basename(filename[0])
+                
+                label_text = os.path.basename(filename[0])
+                label_image = ImageKivy(source=filename[0])
+                label_image.size = (64,64)
+                label = Label(text=label_text)
+                #label.add_widget(label_image)
+                self.loaded_label_grid.add_widget(label)
+                self.loaded_image_grid.add_widget(label_image)
 
         else:
             self.saved_file_path = ""
-            self.loaded_label.text = ""
+            self.loaded_label_grid.clear_widgets()
     
     def is_valid_file(self, filename):
         if os.path.isdir(filename):
