@@ -125,6 +125,7 @@ class Main(BoxLayout):
         else:
             self.saved_file_path = ""
             self.loaded_label_grid.clear_widgets()
+            self.loaded_image_grid.clear_widgets()
     
     def is_valid_file(self, filename):
         if os.path.isdir(filename):
