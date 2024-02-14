@@ -9,6 +9,8 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image as ImageKivy
+from kivy.uix.textinput import TextInput
+from kivy.uix.togglebutton import ToggleButton
 import os
 import glob
 import requests
@@ -43,6 +45,9 @@ class Main(BoxLayout):
         self.alt_api_key = "xVCxSVMNlrOa1ZGBjiXUelQZvcMIoIXf"
         #Valid image files
         self.IMG_EXTENSIONS = ['.jpg','.jpeg', '.png', '.ppm', '.bmp','.tif']
+        
+        self.image_save_path = "outputImages/"
+
         #Label that tracks loaded file/directory
         self.loaded_label_grid = GridLayout()
         self.loaded_label_grid.cols = 1
@@ -58,6 +63,32 @@ class Main(BoxLayout):
         self.request_button = Button(text= "Fazer inferência")
         self.add_widget(self.request_button)
         self.request_button.bind(on_release=self.make_request)
+
+        #alt API and API key field
+        self.api_config_grid = GridLayout()
+        self.api_config_grid.cols = 1
+        
+        self.toggle_alt_api = ToggleButton(text="Usar API alternativa")
+        self.toggle_alt_api.bind(on_press=self.change_alt_api)
+
+        self.api_key_field = TextInput(text=self.alt_api_key, multiline=False)
+        self.api_key_field.bind(text=self.change_api_key)
+
+        self.api_config_grid.add_widget(self.toggle_alt_api)
+        self.api_config_grid.add_widget(self.api_key_field)
+
+        self.add_widget(self.api_config_grid)
+
+    def change_api_key(self, instance, value):
+        self.alt_api_key = value
+
+    def change_alt_api(self, instance):
+        if instance.state == 'down':
+            self.use_alt_api = True
+        else:
+            self.use_alt_api = False
+
+
 
     def open(self, instance):
         box = Box(self.save_filepath)
