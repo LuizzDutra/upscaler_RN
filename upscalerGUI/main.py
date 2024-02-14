@@ -40,6 +40,7 @@ class Main(BoxLayout):
         self.api_url = "http://localhost:5000/predict"
         self.use_alt_api = True
         self.alt_api_url = "https://api.picsart.io/tools/1.0/upscale"
+        self.alt_api_key = "xVCxSVMNlrOa1ZGBjiXUelQZvcMIoIXf"
         #Valid image files
         self.IMG_EXTENSIONS = ['.jpg','.jpeg', '.png', '.ppm', '.bmp','.tif']
         #Label that tracks loaded file/directory
@@ -129,7 +130,7 @@ class Main(BoxLayout):
                 "format": "PNG"
             }
             headers = {"accept": "application/json",
-                       "X-Picsart-API-Key": "xVCxSVMNlrOa1ZGBjiXUelQZvcMIoIXf"}
+                       "X-Picsart-API-Key": self.alt_api_key}
         
             response = requests.post(self.alt_api_url, data=payload, files=files, headers=headers)
             return response
