@@ -45,8 +45,6 @@ class Main(BoxLayout):
         self.alt_api_key = "xVCxSVMNlrOa1ZGBjiXUelQZvcMIoIXf"
         #Valid image files
         self.IMG_EXTENSIONS = ['.jpg','.jpeg', '.png', '.ppm', '.bmp','.tif']
-        
-        self.image_save_path = "outputImages/"
 
         #Label that tracks loaded file/directory
         self.loaded_label_grid = GridLayout()
@@ -81,6 +79,36 @@ class Main(BoxLayout):
         self.api_config_grid.add_widget(self.api_key_field)
 
         self.add_widget(self.api_config_grid)
+
+
+        #output folder option
+        self.output_folder_grid = GridLayout()
+        self.output_folder_grid.cols = 1
+
+        self.image_save_path = "outputImages/"
+
+        self.folder_button = Button(text="Trocar diretório de resultados")
+        self.folder_button.bind(on_press=self.on_folder_button_press)
+
+        self.folder_label = Label(text=self.image_save_path)
+
+        self.output_folder_grid.add_widget(self.folder_button)
+        self.output_folder_grid.add_widget(self.folder_label)
+        self.add_widget(self.output_folder_grid)
+    
+    def on_folder_button_press(self, instance):
+        box = Box(self.change_save_folder)
+        popup = Popup(title='Selecionar caminho de salvamento', content=box, size_hint=(None, None), size=(800, 400))
+        box.parent = popup
+        popup.open()
+
+    def change_save_folder(self, filepath):
+        print("here")
+        filepath = filepath[0]
+        print(filepath)
+        if os.path.isdir(filepath):
+            self.image_save_path = filepath
+            self.folder_label.text = filepath
 
     def change_api_key(self, instance, value):
         self.alt_api_key = value
@@ -194,11 +222,15 @@ class Main(BoxLayout):
             if response.status_code == 200 and response.json()['status'] == 'success':
                 query_parameters = {"downloadformat": "png"}
                 download_response = requests.get(response.json()['data']['url'], params=query_parameters, stream=True)
-                with open(filename, 'wb') as f:
+                if not os.path.exists(self.image_save_path):
+                    os.makedirs(self.image_save_path)
+                with open(self.image_save_path+"\\"+filename, 'wb') as f:
                     f.write(download_response.content)
         else:
+            if not os.path.exists(self.image_save_path):
+                os.makedirs(self.image_save_path)
             image = Image.open(io.BytesIO(response.content))
-            image.save(filename, "PNG")
+            image.save(self.image_save_path+"\\"+filename, "PNG")
 
 
 
