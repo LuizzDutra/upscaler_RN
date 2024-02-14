@@ -75,6 +75,9 @@ class Main(BoxLayout):
         self.api_key_field.bind(text=self.change_api_key)
 
         self.api_config_grid.add_widget(self.toggle_alt_api)
+        temp_label = Label(text="API key:")
+        temp_label.size_hint = (1, 0.1)
+        self.api_config_grid.add_widget(temp_label)
         self.api_config_grid.add_widget(self.api_key_field)
 
         self.add_widget(self.api_config_grid)
@@ -85,8 +88,10 @@ class Main(BoxLayout):
     def change_alt_api(self, instance):
         if instance.state == 'down':
             self.use_alt_api = True
+            self.IMG_EXTENSIONS = ['.jpg', '.png']
         else:
             self.use_alt_api = False
+            self.IMG_EXTENSIONS = ['.jpg','.jpeg', '.png', '.ppm', '.bmp','.tif']
 
 
 
@@ -162,7 +167,6 @@ class Main(BoxLayout):
             else:
                 file = [(os.path.basename(self.saved_file_path), open(self.saved_file_path, 'rb'))]
                 response = self.send_request(file)
-                print(response.json())
                 self.save_response_files(response, file[0][0])
 
     def send_request(self, file):
@@ -171,12 +175,13 @@ class Main(BoxLayout):
                                     files=file)
             return response
         else:
-            print(file)
+            _, file_extension = os.path.splitext(file[0][0])
+            file_extension = file_extension[1:].upper()
 
             files = { "image": (file[0][0], file[0][1], "image/png") }
             payload = {
                 "upscale_factor": "x2",
-                "format": "PNG"
+                "format": file_extension
             }
             headers = {"accept": "application/json",
                        "X-Picsart-API-Key": self.alt_api_key}
