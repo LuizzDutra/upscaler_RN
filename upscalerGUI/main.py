@@ -293,7 +293,7 @@ class Main(FloatLayout):
         else:
             if not os.path.exists(self.image_save_path):
                 os.makedirs(self.image_save_path)
-            image = Image.open(io.BytesIO(response.content))
+            image = Image.open(io.BytesIO(response.content), 'r')
             image.save(self.image_save_path+"\\"+filename, "PNG")
 
 
