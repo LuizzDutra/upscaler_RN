@@ -1,3 +1,10 @@
+from kivy.config import Config
+
+Config.set('graphics', 'resizable', False)
+Config.set('graphics', 'width', '1280')
+Config.set('graphics', 'height', '720')
+
+
 import kivy
 from kivy.app import App
 from kivy.uix.label import Label
@@ -39,6 +46,20 @@ class Main(FloatLayout):
     def __init__(self):
         super().__init__()
 
+        #canvas backgorund
+
+        self.bind(
+            size=self._update_rect,
+            pos=self._update_rect
+        )
+
+        with self.canvas.before:
+            Color(.2, .2, .2, 1)
+            self.rect = Rectangle(
+                size=self.size,
+                pos=self.pos
+            )
+
         self.saved_file_path = ""
         self.path_is_directory = False
         self.api_url = "http://localhost:5000/predict"
@@ -53,13 +74,35 @@ class Main(FloatLayout):
         self.loaded_label_grid.cols = 1
         self.loaded_image_grid = GridLayout()
         self.loaded_image_grid.cols = 1
-        self.add_widget(self.loaded_image_grid)
-        self.add_widget(self.loaded_label_grid)
-        self.loaded_image_grid.size_hint = (0.1, 0.1)
-        self.loaded_label_grid.size_hint = (0.1, 0.1)
+        self.selected_grid = GridLayout()
+        self.selected_grid.rows = 1
+        self.selected_grid.add_widget(self.loaded_image_grid)
+        self.selected_grid.add_widget(self.loaded_label_grid)
+        self.add_widget(self.selected_grid)
+
+
+        self.selected_grid.bind(
+            size=self._update_rect,
+            pos=self._update_rect
+        )
+
+
+        with self.selected_grid.canvas.before:
+            Color(0.7, 0.7, 0.7, 1) # green; colors range from 0-1 instead of 0-255
+            self.selected_grid.rect = Rectangle(size=self.selected_grid.size,
+                                pos=self.selected_grid.pos)
+
+        self.selected_grid.size_hint = (0.35, 0.9)
+        self.selected_grid.pos_hint = {'right': 0.40, 'center_y':0.5}
+        
+
+        self.selected_files_label = Label(text="Arquivos Selecionados:")
+        self.selected_files_label.size_hint = (0.1, 0.1)
+        self.selected_files_label.pos_hint = {'right': 0.285, 'center_y': 0.96}
+        self.add_widget(self.selected_files_label)
 
         self.button = Button(text="Abrir explorador")
-        self.button.pos_hint = {'right': 0.7, 'top': 0.6}
+        self.button.pos_hint = {'center_y': 0.6, 'right': 0.5}
         self.button.size_hint = (0.1, 0.1)
         self.add_widget(self.button)
         self.button.bind(on_release=self.open)
@@ -70,6 +113,7 @@ class Main(FloatLayout):
         self.add_widget(self.request_button)
         self.request_button.bind(on_release=self.make_request)
         self.request_button.size_hint = (0.1, 0.1)
+        self.request_button.pos_hint = {'center_y':0.5, 'right':0.5}
 
         #alt API and API key field
         self.api_config_grid = GridLayout()
@@ -88,7 +132,8 @@ class Main(FloatLayout):
         self.api_config_grid.add_widget(self.api_key_field)
 
         self.add_widget(self.api_config_grid)
-        self.api_config_grid.size_hint = (0.1, 0.1)
+        self.api_config_grid.size_hint = (0.2, 0.4)
+        self.api_config_grid.pos_hint = {'center_y': 0.7, 'right': 0.75}
 
 
         #output folder option
@@ -103,9 +148,17 @@ class Main(FloatLayout):
         self.folder_label = Label(text=self.image_save_path)
 
         self.output_folder_grid.add_widget(self.folder_button)
+        temp_label = Label(text="Pasta de output:")
+        temp_label.size_hint = (1, 0.1)
+        self.output_folder_grid.add_widget(temp_label)
         self.output_folder_grid.add_widget(self.folder_label)
         self.add_widget(self.output_folder_grid)
-        self.output_folder_grid.size_hint = (0.1, 0.1)
+        self.output_folder_grid.size_hint = (0.2, 0.4)
+        self.output_folder_grid.pos_hint = {'center_y': 0.7, 'right': .98}
+
+    def _update_rect(self, instance, value):
+        instance.rect.pos = instance.pos
+        instance.rect.size = instance.size
 
     def on_folder_button_press(self, instance):
         box = Box(self.change_save_folder)
