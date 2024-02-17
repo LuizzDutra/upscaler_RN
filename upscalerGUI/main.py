@@ -5,6 +5,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.widget import Widget
+from kivy.graphics import Rectangle, Color
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
@@ -33,7 +35,7 @@ class Box(BoxLayout):
         self.callback(filename)
     
 #Main Page
-class Main(BoxLayout):
+class Main(FloatLayout):
     def __init__(self):
         super().__init__()
 
@@ -53,14 +55,21 @@ class Main(BoxLayout):
         self.loaded_image_grid.cols = 1
         self.add_widget(self.loaded_image_grid)
         self.add_widget(self.loaded_label_grid)
+        self.loaded_image_grid.size_hint = (0.1, 0.1)
+        self.loaded_label_grid.size_hint = (0.1, 0.1)
 
         self.button = Button(text="Abrir explorador")
+        self.button.pos_hint = {'right': 0.7, 'top': 0.6}
+        self.button.size_hint = (0.1, 0.1)
         self.add_widget(self.button)
         self.button.bind(on_release=self.open)
+
+        
 
         self.request_button = Button(text= "Fazer inferência")
         self.add_widget(self.request_button)
         self.request_button.bind(on_release=self.make_request)
+        self.request_button.size_hint = (0.1, 0.1)
 
         #alt API and API key field
         self.api_config_grid = GridLayout()
@@ -79,6 +88,7 @@ class Main(BoxLayout):
         self.api_config_grid.add_widget(self.api_key_field)
 
         self.add_widget(self.api_config_grid)
+        self.api_config_grid.size_hint = (0.1, 0.1)
 
 
         #output folder option
@@ -95,7 +105,8 @@ class Main(BoxLayout):
         self.output_folder_grid.add_widget(self.folder_button)
         self.output_folder_grid.add_widget(self.folder_label)
         self.add_widget(self.output_folder_grid)
-    
+        self.output_folder_grid.size_hint = (0.1, 0.1)
+
     def on_folder_button_press(self, instance):
         box = Box(self.change_save_folder)
         popup = Popup(title='Selecionar caminho de salvamento', content=box, size_hint=(None, None), size=(800, 400))
