@@ -1,2 +1,2 @@
 # upscaler_project
-Porjeto prara faculdade de upscaler, com GUI em kivy.
+Projeto de upscaler para faculdade, com GUI em kivy.
