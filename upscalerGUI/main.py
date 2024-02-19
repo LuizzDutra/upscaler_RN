@@ -254,12 +254,18 @@ class Main(FloatLayout):
             if self.path_is_directory:
                 for f in self.get_image_files(self.saved_file_path):
                     file = [(os.path.basename(f), open(f, 'rb'))]
-                    response = self.send_request(file)
-                    self.save_response_files(response, file[0][0])
+                    try:
+                        response = self.send_request(file)
+                        self.save_response_files(response, file[0][0])
+                    except:
+                        print("problem on request")
             else:
                 file = [(os.path.basename(self.saved_file_path), open(self.saved_file_path, 'rb'))]
-                response = self.send_request(file)
-                self.save_response_files(response, file[0][0])
+                try:
+                    response = self.send_request(file)
+                    self.save_response_files(response, file[0][0])
+                except:
+                    print("problem on request")
 
     def send_request(self, file):
         if not self.use_alt_api:
