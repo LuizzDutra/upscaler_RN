@@ -116,6 +116,7 @@ class Main(FloatLayout):
         self.request_button.pos_hint = {'center_y':0.5, 'right':0.5}
 
         #alt API and API key field
+        '''
         self.api_config_grid = GridLayout()
         self.api_config_grid.cols = 1
         
@@ -134,7 +135,7 @@ class Main(FloatLayout):
         self.add_widget(self.api_config_grid)
         self.api_config_grid.size_hint = (0.2, 0.4)
         self.api_config_grid.pos_hint = {'center_y': 0.7, 'right': 0.75}
-
+        '''
 
         #output folder option
         self.output_folder_grid = GridLayout()
@@ -154,7 +155,7 @@ class Main(FloatLayout):
         self.output_folder_grid.add_widget(self.folder_label)
         self.add_widget(self.output_folder_grid)
         self.output_folder_grid.size_hint = (0.2, 0.4)
-        self.output_folder_grid.pos_hint = {'center_y': 0.7, 'right': .98}
+        self.output_folder_grid.pos_hint = {'center_y': 0.7, 'right': .75}
 
     def _update_rect(self, instance, value):
         instance.rect.pos = instance.pos
